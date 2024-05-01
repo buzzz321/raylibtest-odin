@@ -63,7 +63,7 @@ raylibmain :: proc() {
 		
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RAYWHITE)
-    plot_wave()
+        plot_wave()
 		//fmt.println("-----------------------------")
 		rl.EndDrawing()
 	}
