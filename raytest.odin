@@ -47,11 +47,16 @@ plot_wave :: proc() {
 plot_fft :: proc(signal: []f64) {
 	x: i32 = 0
 	BW: i32 : 2
-	for &sample in signal {
-		height := cast(i32)sample
+	stride := len(signal) / cast(int)screenWidth
+
+	for i := 0; i < len(signal); i += stride {
+		height := cast(i32)signal[i]
+		if height > 400 {
+			height = 400
+		}
 		//height := cast(i32)math.round_f64(cm.abs(sample) * 40.0)
 		//fmt.printf("sample %#v\n", height)
-		rl.DrawRectangle(x, screenHeight / 2 - height, BW, height, rl.RED)
+		rl.DrawRectangle(x, (screenHeight - 20) - height, BW, height, rl.RED)
 		x += BW
 	}
 }
@@ -75,7 +80,7 @@ raylibmain :: proc() {
 	rl.AttachAudioMixedProcessor(music_callback)
 	defer rl.DetachAudioMixedProcessor(music_callback)
 
-	SPECTRUMSIZE: int : 512 * 8
+	SPECTRUMSIZE: int : 512 * 32
 	prevloop: [SPECTRUMSIZE / 2]f64
 	for !rl.WindowShouldClose() {
 		cnt := sync.atomic_load(&counter)
