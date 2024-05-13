@@ -71,10 +71,10 @@ raylibmain :: proc() {
 	rl.InitAudioDevice()
 	defer rl.CloseAudioDevice()
 
-	music := rl.LoadSound("C64MattGraysDriller.ogg")
+	//music := rl.LoadSound("C64MattGraysDriller.ogg")
+	music := rl.LoadSound("elimination.ogg")
 	rl.SetTargetFPS(60)
 
-	rl.PlaySound(music)
 	defer rl.StopSound(music)
 
 	rl.AttachAudioMixedProcessor(music_callback)
@@ -82,7 +82,12 @@ raylibmain :: proc() {
 
 	SPECTRUMSIZE: int : 512 * 32
 	prevloop: [SPECTRUMSIZE / 2]f64
+	start_play: bool = false
 	for !rl.WindowShouldClose() {
+		if rl.IsKeyDown(rl.KeyboardKey.P) {
+			start_play = true
+			rl.PlaySound(music)
+		}
 		cnt := sync.atomic_load(&counter)
 		sync.atomic_store(&counter, 0)
 
@@ -109,7 +114,9 @@ raylibmain :: proc() {
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RAYWHITE)
-		plot_fft(prevloop[:])
+		if start_play {
+			plot_fft(prevloop[:])
+		}
 		//fmt.println("-----------------------------")
 		//fmt.println(cnt)
 		//rl.DrawRectangle(30, screenHeight / 2 - 50, 10, 50, rl.GREEN)

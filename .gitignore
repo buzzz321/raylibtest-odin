@@ -2,3 +2,7 @@
 raytest
 raytest.dSYM/Contents/Info.plist
 C64MattGraysDriller.ogg
+*.ogg
+nit-debug
+/raylibtest.dSYM
+raylibtest
