@@ -54,8 +54,6 @@ plot_fft :: proc(signal: []f64) {
 		if height > 400 {
 			height = 400
 		}
-		//height := cast(i32)math.round_f64(cm.abs(sample) * 40.0)
-		//fmt.printf("sample %#v\n", height)
 		rl.DrawRectangle(x, (screenHeight - 20) - height, BW, height, rl.RED)
 		x += BW
 	}
@@ -117,9 +115,6 @@ raylibmain :: proc() {
 		if start_play {
 			plot_fft(prevloop[:])
 		}
-		//fmt.println("-----------------------------")
-		//fmt.println(cnt)
-		//rl.DrawRectangle(30, screenHeight / 2 - 50, 10, 50, rl.GREEN)
 		rl.EndDrawing()
 	}
 
