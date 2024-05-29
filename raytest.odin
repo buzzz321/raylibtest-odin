@@ -48,6 +48,7 @@ plot_fft :: proc(signal: []f64) {
 	x: i32 = 0
 	BW: i32 : 2
 	stride := len(signal) / cast(int)screenWidth
+	//fmt.println(counter)
 
 	for i := 0; i < len(signal); i += stride {
 		height := cast(i32)signal[i]
