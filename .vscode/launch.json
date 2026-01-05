@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug",
-            "program": "${workspaceFolder}/raylibtest",
+            "program": "${workspaceFolder}/raylibtest-odin",
             "args": [],
             "cwd": "${workspaceFolder}"
         }

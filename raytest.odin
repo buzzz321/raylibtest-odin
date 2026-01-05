@@ -12,14 +12,15 @@ screenWidth: i32 : 800
 screenHeight: i32 : 450
 
 counter: i32 = 0
-
-cb_data: [1024]f32
+Fs: int : 16384 * 2
+//cb_data: [1024]f32
+cb_data: [Fs]f32
 
 music_callback :: proc "c" (bufferData: rawptr, frames: c.uint) {
 	data: [^]f32 = cast(^f32)bufferData
 
 	sync.atomic_add(&counter, 1)
-	for index in 0 ..< (frames * 2) {
+	for index in 0 ..< (frames * 1) {
 		cb_data[index] = data[index]
 	}
 }
@@ -57,6 +58,7 @@ plot_fft :: proc(signal: []f64) {
 		}
 		rl.DrawRectangle(x, (screenHeight - 20) - height, BW, height, rl.RED)
 		x += BW
+		if x >= screenWidth do break
 	}
 }
 
@@ -71,16 +73,22 @@ raylibmain :: proc() {
 	defer rl.CloseAudioDevice()
 
 	//music := rl.LoadSound("C64MattGraysDriller.ogg")
-	music := rl.LoadSound("elimination.ogg")
-	rl.SetTargetFPS(60)
+	music := rl.LoadSound("Cube-Bullet-Sequence.ogg")
+	//music := rl.LoadSound("triple_sine_wave.ogg")
 
+	rl.SetTargetFPS(60)
+    //rl.SetMasterVolume(0)
 	defer rl.StopSound(music)
 
 	rl.AttachAudioMixedProcessor(music_callback)
 	defer rl.DetachAudioMixedProcessor(music_callback)
 
-	SPECTRUMSIZE: int : 512 * 32
+	//SPECTRUMSIZE: int : 512 * 32
+	SPECTRUMSIZE: int : Fs
 	prevloop: [SPECTRUMSIZE / 2]f64
+    lchan := make([]complex128, SPECTRUMSIZE / 2)
+    defer delete(lchan)
+    
 	start_play: bool = false
 	for !rl.WindowShouldClose() {
 		if rl.IsKeyDown(rl.KeyboardKey.P) {
@@ -90,19 +98,22 @@ raylibmain :: proc() {
 		cnt := sync.atomic_load(&counter)
 		sync.atomic_store(&counter, 0)
 
-		lchan: [SPECTRUMSIZE]complex128
-		for i in 0 ..< (len(cb_data) / 2) {
-			t := cast(f32)i / cast(f32)(len(cb_data) / 2)
-			hann := 0.5 - 0.5 * math.cos_f32(2.0 * math.PI * (cast(f32)t * 2.0))
+		num_samples := len(cb_data) / 2
+		for i in 0 ..< num_samples {
+			t := cast(f32)i / cast(f32)(num_samples - 1)
+			hann := 0.5 - 0.5 * math.cos_f32(2.0 * math.PI * t)
 
 			lchan[i] = complex(cb_data[i * 2 + 0] * hann, 0.0)
+            //if cm.abs(lchan[i]) > 0 {
+            //    fmt.println(lchan[i])
+            //}
 		}
 		fftiter(lchan[:])
 
 		i: int = 0
 		decay: f64 : 0.95
 		for sample in lchan[:SPECTRUMSIZE / 2] {
-			tmp := cast(f64)(math.round_f64(cm.abs(sample) * 40.0))
+			tmp := cast(f64)(math.round_f64(cm.abs(sample) * 4000.0))
 			if prevloop[i] > tmp {
 				prevloop[i] = prevloop[i] * decay
 			} else {
